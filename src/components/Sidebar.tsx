@@ -1,10 +1,14 @@
-import { Home, Search, BookMarked, Sparkles, Settings, LogOut, BookOpen } from "lucide-react";
+import { Home, Search, BookMarked, Sparkles, Settings, LogOut, BookOpen, Menu, X } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Sidebar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -25,8 +29,34 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border flex flex-col">
-      {/* Header */}
+    <>
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 md:hidden"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      )}
+
+      {/* Overlay for mobile */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 h-screen w-64 bg-card border-r border-border flex flex-col z-40 transition-transform duration-300 ${
+          isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
+        } md:translate-x-0`}
+      >
+        {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
@@ -45,6 +75,7 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={() => isMobile && setIsOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 isActive
@@ -78,7 +109,8 @@ const Sidebar = () => {
           Sign Out
         </Button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 

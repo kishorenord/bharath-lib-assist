@@ -1,0 +1,4 @@
+project_id = "pyepxaxguojyzthvgyyz"
+
+[functions.library-chat]
+verify_jwt = true

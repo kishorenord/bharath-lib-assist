@@ -183,7 +183,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_role: { Args: never; Returns: string }
+      is_librarian: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
       user_role: "student" | "librarian"

@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, conversation_id } = await req.json();
     
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -30,11 +30,25 @@ serve(async (req) => {
       throw new Error("No user found");
     }
 
-    // Get user's chat history (last 10 messages for context)
+    // Ensure we have a conversation_id
+    let conversationId = conversation_id;
+    if (!conversationId) {
+      // Create a new conversation if not provided
+      const { data: newConv, error: convError } = await supabaseClient
+        .from("conversations")
+        .insert({ user_id: user.id, title: "New Chat" })
+        .select()
+        .single();
+      
+      if (convError) throw convError;
+      conversationId = newConv.id;
+    }
+
+    // Get conversation history (last 10 messages for context)
     const { data: history } = await supabaseClient
       .from("chat_messages")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("conversation_id", conversationId)
       .order("created_at", { ascending: false })
       .limit(10);
 
@@ -102,10 +116,10 @@ Borrowing rules: 14-day loan period, max 5 books at a time, renewals allowed if 
     const data = await response.json();
     const assistantMessage = data.choices[0].message.content;
 
-    // Save both user and assistant messages to history
+    // Save both user and assistant messages to history with conversation_id
     await supabaseClient.from("chat_messages").insert([
-      { user_id: user.id, role: "user", content: message },
-      { user_id: user.id, role: "assistant", content: assistantMessage },
+      { user_id: user.id, conversation_id: conversationId, role: "user", content: message },
+      { user_id: user.id, conversation_id: conversationId, role: "assistant", content: assistantMessage },
     ]);
 
     console.log("Successfully processed chat message");

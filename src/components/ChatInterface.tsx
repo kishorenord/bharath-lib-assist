@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, BookOpen } from "lucide-react";
+import { Send, Loader2, BookOpen, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
@@ -18,6 +18,7 @@ const ChatInterface = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -30,32 +31,90 @@ const ChatInterface = () => {
   }, [messages]);
 
   useEffect(() => {
-    loadChatHistory();
+    initializeChat();
   }, []);
 
-  const loadChatHistory = async () => {
+  useEffect(() => {
+    if (currentConversationId) {
+      loadChatHistory();
+    }
+  }, [currentConversationId]);
+
+  const initializeChat = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .select("*")
+      // Get most recent conversation
+      const { data: conversations } = await supabase
+        .from("conversations")
+        .select("id")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: true })
-        .limit(50);
+        .order("updated_at", { ascending: false })
+        .limit(1);
 
-      if (error) throw error;
-      if (data) setMessages(data as Message[]);
+      if (conversations && conversations.length > 0) {
+        setCurrentConversationId(conversations[0].id);
+      } else {
+        // Create first conversation
+        await createNewConversation();
+      }
     } catch (error: any) {
-      console.error("Error loading chat history:", error);
+      console.error("Error initializing chat:", error);
     } finally {
       setLoadingHistory(false);
     }
   };
 
+  const createNewConversation = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("conversations")
+        .insert({ user_id: user.id, title: "New Chat" })
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setCurrentConversationId(data.id);
+        setMessages([]);
+        toast({
+          title: "New chat started",
+          description: "Your conversation history is saved automatically.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error creating conversation:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create new conversation",
+      });
+    }
+  };
+
+  const loadChatHistory = async () => {
+    if (!currentConversationId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .eq("conversation_id", currentConversationId)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      if (data) setMessages(data as Message[]);
+    } catch (error: any) {
+      console.error("Error loading chat history:", error);
+    }
+  };
+
   const handleSend = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !currentConversationId) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -63,7 +122,10 @@ const ChatInterface = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("library-chat", {
-        body: { message: userMessage },
+        body: { 
+          message: userMessage,
+          conversation_id: currentConversationId 
+        },
       });
 
       if (error) throw error;
@@ -92,14 +154,25 @@ const ChatInterface = () => {
     <Card className="flex flex-col h-full bg-background">
       {/* Chat Header */}
       <div className="border-b border-border p-4 bg-gradient-to-r from-primary/10 to-accent/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-            <BookOpen className="h-5 w-5 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-lg">Library Assistant</h2>
+              <p className="text-sm text-muted-foreground">Ask me anything about the library</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-semibold text-lg">Library Assistant</h2>
-            <p className="text-sm text-muted-foreground">Ask me anything about the library</p>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={createNewConversation}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">New Chat</span>
+          </Button>
         </div>
       </div>
 

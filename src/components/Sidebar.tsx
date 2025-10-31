@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import biherLogo from "@/assets/biher-logo.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,12 +57,14 @@ const Sidebar = () => {
           isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
         } md:translate-x-0`}
       >
-        {/* Header */}
+      {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-            <BookOpen className="h-5 w-5 text-white" />
-          </div>
+          <img 
+            src={biherLogo} 
+            alt="BIHER Logo" 
+            className="w-12 h-12 object-contain"
+          />
           <div>
             <h1 className="font-bold text-lg text-foreground">Library Assistant</h1>
             <p className="text-xs text-muted-foreground">BHARATH UNIVERSITY</p>

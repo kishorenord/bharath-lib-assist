@@ -175,11 +175,13 @@ const ChatInterface = () => {
       <div className="border-b border-border p-4 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img 
-              src={biherLogo} 
-              alt="BIHER Logo" 
-              className="w-10 h-10 object-contain"
-            />
+            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center p-1">
+              <img 
+                src={biherLogo} 
+                alt="BIHER Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
             <div>
               <h2 className="font-semibold text-lg">Library Assistant</h2>
               <p className="text-sm text-muted-foreground">Ask me anything about the library</p>
@@ -205,11 +207,13 @@ const ChatInterface = () => {
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-            <img 
-              src={biherLogo} 
-              alt="BIHER Logo" 
-              className="w-24 h-24 object-contain"
-            />
+            <div className="w-28 h-28 bg-background rounded-2xl flex items-center justify-center p-2 shadow-lg">
+              <img 
+                src={biherLogo} 
+                alt="BIHER Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
             <div>
               <h3 className="text-xl font-semibold mb-2">Welcome to Library Assistant</h3>
               <p className="text-muted-foreground mb-6">

@@ -60,11 +60,13 @@ const Sidebar = () => {
       {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <img 
-            src={biherLogo} 
-            alt="BIHER Logo" 
-            className="w-12 h-12 object-contain"
-          />
+          <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center p-1 shadow-sm">
+            <img 
+              src={biherLogo} 
+              alt="BIHER Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div>
             <h1 className="font-bold text-lg text-foreground">Library Assistant</h1>
             <p className="text-xs text-muted-foreground">BHARATH UNIVERSITY</p>

@@ -85,11 +85,13 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-indigo-900 p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-4 text-center">
-          <img 
-            src={biherLogo} 
-            alt="BIHER Logo" 
-            className="mx-auto w-20 h-20 object-contain"
-          />
+          <div className="mx-auto w-24 h-24 bg-background rounded-2xl flex items-center justify-center p-2 shadow-md">
+            <img 
+              src={biherLogo} 
+              alt="BIHER Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div>
             <CardTitle className="text-2xl font-bold">Library Assistant</CardTitle>
             <CardDescription className="text-base mt-2">

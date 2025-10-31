@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Loader2 } from "lucide-react";
+import biherLogo from "@/assets/biher-logo.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -84,9 +85,11 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-indigo-900 p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-            <BookOpen className="h-8 w-8 text-white" />
-          </div>
+          <img 
+            src={biherLogo} 
+            alt="BIHER Logo" 
+            className="mx-auto w-20 h-20 object-contain"
+          />
           <div>
             <CardTitle className="text-2xl font-bold">Library Assistant</CardTitle>
             <CardDescription className="text-base mt-2">

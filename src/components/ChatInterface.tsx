@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import biherLogo from "@/assets/biher-logo.png";
 
 interface Message {
   id: string;
@@ -174,9 +175,11 @@ const ChatInterface = () => {
       <div className="border-b border-border p-4 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
+            <img 
+              src={biherLogo} 
+              alt="BIHER Logo" 
+              className="w-10 h-10 object-contain"
+            />
             <div>
               <h2 className="font-semibold text-lg">Library Assistant</h2>
               <p className="text-sm text-muted-foreground">Ask me anything about the library</p>
@@ -202,9 +205,11 @@ const ChatInterface = () => {
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-              <BookOpen className="h-10 w-10 text-white" />
-            </div>
+            <img 
+              src={biherLogo} 
+              alt="BIHER Logo" 
+              className="w-24 h-24 object-contain"
+            />
             <div>
               <h3 className="text-xl font-semibold mb-2">Welcome to Library Assistant</h3>
               <p className="text-muted-foreground mb-6">

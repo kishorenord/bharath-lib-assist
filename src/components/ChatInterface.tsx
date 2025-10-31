@@ -43,19 +43,32 @@ const ChatInterface = () => {
   const initializeChat = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log("No user found, cannot initialize chat");
+        return;
+      }
+
+      console.log("Initializing chat for user:", user.id);
 
       // Get most recent conversation
-      const { data: conversations } = await supabase
+      const { data: conversations, error: convError } = await supabase
         .from("conversations")
         .select("id")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
         .limit(1);
 
+      if (convError) {
+        console.error("Error fetching conversations:", convError);
+      }
+
+      console.log("Found conversations:", conversations);
+
       if (conversations && conversations.length > 0) {
+        console.log("Setting conversation ID to:", conversations[0].id);
         setCurrentConversationId(conversations[0].id);
       } else {
+        console.log("No conversations found, creating new one");
         // Create first conversation
         await createNewConversation();
       }
@@ -100,13 +113,18 @@ const ChatInterface = () => {
     if (!currentConversationId) return;
     
     try {
+      console.log("Loading chat history for conversation:", currentConversationId);
       const { data, error } = await supabase
         .from("chat_messages")
         .select("*")
         .eq("conversation_id", currentConversationId)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error loading chat history:", error);
+        throw error;
+      }
+      console.log("Loaded messages:", data);
       if (data) setMessages(data as Message[]);
     } catch (error: any) {
       console.error("Error loading chat history:", error);

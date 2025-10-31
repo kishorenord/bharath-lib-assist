@@ -117,12 +117,18 @@ Borrowing rules: 14-day loan period, max 5 books at a time, renewals allowed if 
     const assistantMessage = data.choices[0].message.content;
 
     // Save both user and assistant messages to history with conversation_id
-    await supabaseClient.from("chat_messages").insert([
+    console.log("Saving messages with conversation_id:", conversationId);
+    const { error: insertError } = await supabaseClient.from("chat_messages").insert([
       { user_id: user.id, conversation_id: conversationId, role: "user", content: message },
       { user_id: user.id, conversation_id: conversationId, role: "assistant", content: assistantMessage },
     ]);
 
-    console.log("Successfully processed chat message");
+    if (insertError) {
+      console.error("Error inserting messages:", insertError);
+      throw insertError;
+    }
+
+    console.log("Successfully processed and saved chat messages");
 
     return new Response(
       JSON.stringify({ message: assistantMessage }),

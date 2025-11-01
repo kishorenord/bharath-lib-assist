@@ -8,6 +8,8 @@ import Auth from "./pages/Auth";
 import MyBooks from "./pages/MyBooks";
 import Search from "./pages/Search";
 import Recommendations from "./pages/Recommendations";
+import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/search" element={<Search />} />
           <Route path="/my-books" element={<MyBooks />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/recommendations" element={<Recommendations />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

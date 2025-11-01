@@ -7,14 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpen, Loader2, Camera } from "lucide-react";
 import biherLogo from "@/assets/biher-logo.png";
+import BarcodeScanner from "@/components/BarcodeScanner";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -81,6 +83,57 @@ const Auth = () => {
     }
   };
 
+  const handleBarcodeDetected = async (code: string) => {
+    setShowScanner(false);
+    setLoading(true);
+
+    try {
+      // Look up user by student_id
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("student_id", code)
+        .single();
+
+      if (profileError || !profiles) {
+        toast({
+          variant: "destructive",
+          title: "Student ID not found",
+          description: "Please register first or check your student ID",
+        });
+        return;
+      }
+
+      // For barcode login, we'll need to use a different approach
+      // since we don't have the password. This would typically require
+      // a passwordless authentication flow or magic link
+      toast({
+        title: "Student ID detected",
+        description: `Email: ${profiles.email}. Please enter your password to continue.`,
+      });
+      setEmail(profiles.email);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (showScanner) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-indigo-900 p-4">
+        <BarcodeScanner
+          onDetected={handleBarcodeDetected}
+          onClose={() => setShowScanner(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-indigo-900 p-4">
       <Card className="w-full max-w-md shadow-2xl">
@@ -133,6 +186,24 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
+                </Button>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowScanner(true)}
+                  disabled={loading}
+                >
+                  <Camera className="mr-2 h-4 w-4" />
+                  Scan ID Card
                 </Button>
               </form>
             </TabsContent>

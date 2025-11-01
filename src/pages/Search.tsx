@@ -5,7 +5,9 @@ import Sidebar from "@/components/Sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search as SearchIcon, MapPin, BookOpen, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search as SearchIcon, MapPin, BookOpen, Loader2, Heart, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Book {
   id: string;
@@ -24,11 +26,14 @@ const Search = () => {
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     checkAuth();
     loadBooks();
+    loadWishlist();
   }, []);
 
   useEffect(() => {
@@ -68,6 +73,77 @@ const Search = () => {
       console.error("Error loading books:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadWishlist = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("book_id")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      setWishlistIds(new Set(data?.map((item) => item.book_id) || []));
+    } catch (error) {
+      console.error("Error loading wishlist:", error);
+    }
+  };
+
+  const addToWishlist = async (bookId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("wishlist")
+        .insert({ user_id: user.id, book_id: bookId });
+
+      if (error) throw error;
+
+      setWishlistIds(new Set([...wishlistIds, bookId]));
+      toast({
+        title: "Added to wishlist",
+        description: "Book has been added to your wishlist",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to add to wishlist",
+      });
+    }
+  };
+
+  const removeFromWishlist = async (bookId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("wishlist")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("book_id", bookId);
+
+      if (error) throw error;
+
+      const newWishlistIds = new Set(wishlistIds);
+      newWishlistIds.delete(bookId);
+      setWishlistIds(newWishlistIds);
+      toast({
+        title: "Removed from wishlist",
+        description: "Book has been removed from your wishlist",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to remove from wishlist",
+      });
     }
   };
 
@@ -131,6 +207,29 @@ const Search = () => {
                     {book.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2">{book.description}</p>
                     )}
+                    <div className="flex gap-2 pt-2">
+                      {wishlistIds.has(book.id) ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => removeFromWishlist(book.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => addToWishlist(book.id)}
+                        >
+                          <Heart className="h-4 w-4 mr-2" />
+                          Add to Wishlist
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

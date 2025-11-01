@@ -1,4 +1,4 @@
-import { Home, Search, BookMarked, Sparkles, Settings, LogOut, BookOpen, Menu, X } from "lucide-react";
+import { Home, Search, BookMarked, Sparkles, Settings, LogOut, BookOpen, Menu, X, Heart, User } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
@@ -26,6 +26,8 @@ const Sidebar = () => {
     { icon: Home, label: "Home", path: "/" },
     { icon: Search, label: "Search Books", path: "/search" },
     { icon: BookMarked, label: "My Books", path: "/my-books" },
+    { icon: Heart, label: "My Wishlist", path: "/wishlist" },
+    { icon: User, label: "Profile", path: "/profile" },
     { icon: Sparkles, label: "Recommendations", path: "/recommendations" },
   ];
 
